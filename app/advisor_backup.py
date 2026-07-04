@@ -1,18 +1,5 @@
 from app.heuristics import analyze_resume
 
-import os
-from dotenv import load_dotenv
-import google.generativeai as genai
-
-load_dotenv()
-
-genai.configure(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
-
-model = genai.GenerativeModel(
-    "gemini-2.5-flash"
-)
 
 def get_resume_advice(resume_text, job_description):
     """Return simple, deterministic advice using existing utilities.
@@ -21,27 +8,6 @@ def get_resume_advice(resume_text, job_description):
     feedback: match score, missing keywords, basic checks, and
     actionable improvement suggestions.
     """
-
-    prompt = f"""
-    You are an ATS Resume Expert.
-
-    Analyze the following resume and job description.
-
-    Resume:
-    {resume_text}
-
-    Job Description:
-    {job_description}
-
-    Give only 5 short bullet point suggestions to improve the resume.
-    """
-
-    try:
-        response = model.generate_content(prompt)
-        return response.text
-
-    except Exception as e:
-        return f"Gemini API Error: {e}"
 
     # Simple token-based match score to avoid heavy dependencies
     resume_words = set(resume_text.lower().split())
