@@ -3,6 +3,7 @@ from app.preprocessor import preprocess_text
 from app.heuristics import analyze_resume
 from app.matcher import calculate_match_score, find_missing_keywords
 from app.advisor import get_resume_advice
+
 from database.db_manager import (
     create_database,
     save_result,
@@ -37,30 +38,29 @@ job_description = st.text_area(
 
 if st.button("Analyze Resume"):
 
-    if (
-        candidate_name
-        and uploaded_file
-        and job_description
-    ):
-        
+    if candidate_name and uploaded_file and job_description:
+
+        # Resume Parsing
         resume_text = parse_resume(uploaded_file)
 
+        # Text Cleaning
         clean_resume = preprocess_text(resume_text)
-
         clean_job = preprocess_text(job_description)
 
+        # ATS Score
         score = calculate_match_score(
             clean_resume,
             clean_job
         )
 
+        # Missing Skills
         missing = find_missing_keywords(
             clean_resume,
             clean_job
         )
 
         st.success("Analysis Complete")
-        
+
         save_result(
             candidate_name,
             score
@@ -74,22 +74,21 @@ if st.button("Analyze Resume"):
         )
 
         if score >= 80:
-
-            st.success("Excellent Resume")
+            status = "Excellent Resume"
+            st.success(status)
 
         elif score >= 60:
-
-            st.warning("Good Resume")
+            status = "Good Resume"
+            st.warning(status)
 
         else:
+            status = "Needs Improvement"
+            st.error(status)
 
-            st.error("Needs Improvement")
-       
-       
-        heuristics = analyze_resume(
-            resume_text
-        )
+        # Heuristics
+        heuristics = analyze_resume(resume_text)
 
+        # Gemini Advice
         advice = get_resume_advice(
             resume_text,
             job_description
@@ -97,7 +96,7 @@ if st.button("Analyze Resume"):
 
         st.divider()
 
-        st.write("Heuristics Result:")
+        st.subheader("Heuristics Result")
         st.write(heuristics)
 
         st.divider()
@@ -105,13 +104,9 @@ if st.button("Analyze Resume"):
         st.subheader("Missing Skills")
 
         if missing:
-
             for skill in missing:
-
                 st.write(f"• {skill.title()}")
-
         else:
-
             st.success("No Missing Skills Found")
 
         st.divider()
@@ -119,23 +114,21 @@ if st.button("Analyze Resume"):
         st.subheader("AI Suggestions")
         st.info(advice)
 
+        # Download Report
         report = f"""
-        Candidate Name : {candidate_name}
+Candidate Name : {candidate_name}
 
-        ATS Score : {score}%
+ATS Score : {score}%
 
-        Resume Status :
+Resume Status :
+{status}
 
-        {"Excellent Resume" if score >= 80 else "Good Resume" if score >= 60 else "Needs Improvement"}
+Missing Skills :
+{", ".join(missing) if missing else "None"}
 
-        Missing Skills :
-
-        {", ".join(missing)}
-
-        AI Suggestions :
-
-        {advice}        
-        """
+AI Suggestions :
+{advice}
+"""
 
         st.download_button(
             label="Download Report",
@@ -145,32 +138,12 @@ if st.button("Analyze Resume"):
         )
 
     else:
-
         st.warning(
-           "Please enter candidate name, upload resume and enter job description."
-       )
-        
-st.divider()
-
-st.subheader("Analysis History")
-
-history = get_results()
-
-for row in history:
-
-    st.write(
-        f"Candidate Name : {row[1]}"
-    )
-
-    st.write(
-        f"ATS Score : {row[2]}%"
-    )
-
-    st.write("-----------------------------")
+            "Please enter candidate name, upload resume and enter job description."
+        )
 
 st.divider()
 
 st.caption(
     "Developed using Python, Streamlit, SQLite and NLP."
 )
-    
