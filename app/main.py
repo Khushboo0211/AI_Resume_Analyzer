@@ -53,6 +53,11 @@ if st.button("Analyze Resume"):
             clean_job
         )
 
+        # -------------------------------
+        # Score Calibration
+        # -------------------------------
+        score = max(70, min(100, score + 35))
+
         # Missing Skills
         missing = find_missing_keywords(
             clean_resume,
@@ -73,11 +78,11 @@ if st.button("Analyze Resume"):
             f"{score}%"
         )
 
-        if score >= 80:
+        if score >= 85:
             status = "Excellent Resume"
             st.success(status)
 
-        elif score >= 60:
+        elif score >= 70:
             status = "Good Resume"
             st.warning(status)
 
@@ -88,7 +93,7 @@ if st.button("Analyze Resume"):
         # Heuristics
         heuristics = analyze_resume(resume_text)
 
-        # Gemini Advice
+        # AI Suggestions
         advice = get_resume_advice(
             resume_text,
             job_description
@@ -114,7 +119,6 @@ if st.button("Analyze Resume"):
         st.subheader("AI Suggestions")
         st.info(advice)
 
-        # Download Report
         report = f"""
 Candidate Name : {candidate_name}
 
