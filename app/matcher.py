@@ -4,10 +4,6 @@ import re
 
 
 def create_vectors(resume_text, job_text):
-    """
-    Create TF-IDF vectors.
-    """
-
     vectorizer = TfidfVectorizer(stop_words="english")
 
     vectors = vectorizer.fit_transform(
@@ -18,9 +14,6 @@ def create_vectors(resume_text, job_text):
 
 
 def calculate_skill_score(resume_text, job_text):
-    """
-    Calculate keyword matching score.
-    """
 
     resume_words = set(
         re.findall(r"[a-zA-Z0-9+#.]+", resume_text.lower())
@@ -36,8 +29,8 @@ def calculate_skill_score(resume_text, job_text):
     matched = resume_words.intersection(job_words)
 
     score = (
-        len(matched)
-        / len(job_words)
+        len(matched) /
+        len(job_words)
     ) * 100
 
     return round(score, 2)
@@ -63,35 +56,25 @@ def calculate_match_score(resume_text, job_text):
         job_text
     )
 
-    # Raw ATS Score
+    # Weighted ATS Score
     raw_score = (
-        (0.3 * tfidf_score) +
-        (0.7 * skill_score)
+        (0.4 * tfidf_score) +
+        (0.6 * skill_score)
     )
 
-    # -------- Score Calibration --------
-    if raw_score < 20:
-        final_score = 65 + (raw_score * 0.5)
+    # Scale score to 60–82
+    final_score = 60 + (raw_score * 0.22)
 
-    elif raw_score < 40:
-        final_score = 75 + ((raw_score - 20) * 0.5)
+    if final_score > 82:
+        final_score = 82
 
-    elif raw_score < 60:
-        final_score = 85 + ((raw_score - 40) * 0.4)
-
-    else:
-        final_score = 93 + ((raw_score - 60) * 0.2)
-
-    if final_score > 100:
-        final_score = 100
+    if final_score < 60:
+        final_score = 60
 
     return round(final_score, 2)
 
 
 def find_missing_keywords(resume_text, job_text):
-    """
-    Find keywords missing from resume.
-    """
 
     resume_words = set(
         re.findall(r"[a-zA-Z0-9+#.]+", resume_text.lower())
@@ -102,10 +85,11 @@ def find_missing_keywords(resume_text, job_text):
     )
 
     stop_words = {
-        "and", "or", "the", "a", "an", "to",
-        "of", "in", "for", "with", "on",
-        "at", "is", "are", "be", "by",
-        "from", "this", "that", "will",
+        "and", "or", "the", "a", "an",
+        "to", "of", "in", "for",
+        "with", "on", "at", "is",
+        "are", "be", "by", "from",
+        "this", "that", "will",
         "can", "should", "must"
     }
 

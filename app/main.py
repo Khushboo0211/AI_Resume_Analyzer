@@ -40,25 +40,16 @@ if st.button("Analyze Resume"):
 
     if candidate_name and uploaded_file and job_description:
 
-        # Resume Parsing
         resume_text = parse_resume(uploaded_file)
 
-        # Text Cleaning
         clean_resume = preprocess_text(resume_text)
         clean_job = preprocess_text(job_description)
 
-        # ATS Score
         score = calculate_match_score(
             clean_resume,
             clean_job
         )
 
-        # -------------------------------
-        # Score Calibration
-        # -------------------------------
-        score = max(70, min(100, score + 35))
-
-        # Missing Skills
         missing = find_missing_keywords(
             clean_resume,
             clean_job
@@ -78,7 +69,7 @@ if st.button("Analyze Resume"):
             f"{score}%"
         )
 
-        if score >= 85:
+        if score >= 80:
             status = "Excellent Resume"
             st.success(status)
 
@@ -90,10 +81,8 @@ if st.button("Analyze Resume"):
             status = "Needs Improvement"
             st.error(status)
 
-        # Heuristics
         heuristics = analyze_resume(resume_text)
 
-        # AI Suggestions
         advice = get_resume_advice(
             resume_text,
             job_description
